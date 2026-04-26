@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Radiology AI &middot; Decision Making</title>
+  <meta name="description" content="Behavioural case study of AI in chest X-ray diagnosis. MGRCM0035 — University of Bristol.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="nav">
+    <a href="index.html" class="brand">
+      <span class="logo"></span>
+      Radiology AI &middot; Decision Making
+    </a>
+    <ul>
+      <li><a href="index.html" class="active">Overview</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="simulator.html">Anchoring simulator</a></li>
+      <li><a href="case-study.html">Case study</a></li>
+    </ul>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-inner">
+    <span class="pill">MGRCM0035 &middot; Behaviour, Decision Making and Analytics</span>
+    <h1>When AI sees the X-ray first, the radiologist sees it differently.</h1>
+    <p class="lede">
+      A behavioural case study of CheXpert-class diagnostic AI in chest radiology.
+      We replicate the published model's discrimination, audit its bias across
+      sex and age, and quantify how the order in which AI advice is presented
+      changes a clinician's accuracy &mdash; for better, and sometimes for much worse.
+    </p>
+    <div class="cta-row">
+      <a href="dashboard.html" class="btn btn-primary">View live dashboard &rarr;</a>
+      <a href="simulator.html" class="btn btn-ghost">Try the anchoring simulator</a>
+    </div>
+  </div>
+</section>
+
+<main>
+
+  <h2>Headline numbers</h2>
+  <div class="grid cols-4">
+    <div class="stat">
+      <div class="label">Mean AI AUC</div>
+      <div class="value" id="kpi-auc">&hellip;</div>
+      <div class="sub">across 5 pathologies (n=234 studies)</div>
+    </div>
+    <div class="stat warn">
+      <div class="label">Female TPR gap</div>
+      <div class="value" id="kpi-sex">&hellip;</div>
+      <div class="sub">underdiagnosis bias vs male patients</div>
+    </div>
+    <div class="stat warn">
+      <div class="label">Age 80+ TPR gap</div>
+      <div class="value" id="kpi-age">&hellip;</div>
+      <div class="sub">accuracy disparity in oldest cohort</div>
+    </div>
+    <div class="stat accent">
+      <div class="label">Anchoring penalty</div>
+      <div class="value" id="kpi-anchor">&hellip;</div>
+      <div class="sub">accuracy drop when AI is wrong & shown first</div>
+    </div>
+  </div>
+
+  <h2>What this project is</h2>
+  <p>
+    Diagnostic AI is increasingly embedded in clinical workflows: the
+    Stanford CheXpert and CheXNet models for chest X-ray, IDx-DR for
+    diabetic retinopathy, and a growing number of FDA-cleared radiology
+    tools. The technical story is well-rehearsed &mdash; AUC numbers,
+    headline accuracy gains, regulatory milestones. The behavioural story
+    is murkier.
+  </p>
+  <p>
+    This project asks: <em>how does the way AI advice is delivered change
+    the human decision?</em>
+    Drawing on Kahneman's dual-process theory, Logg et al.'s algorithm
+    appreciation findings and Gaube et al.'s 2021 anchoring experiments,
+    we run an empirical simulation showing the cognitive cost of getting
+    the human-AI hand-off wrong.
+  </p>
+
+  <h2>How we built it</h2>
+  <div class="grid cols-3">
+    <div class="card flat">
+      <h3>1. Calibrated dataset</h3>
+      <p>
+        A 234-study CheXpert-style validation sample with AI predictions whose
+        per-pathology AUCs match Irvin et al. (2019), and demographic-bias
+        gaps modelled on Seyyed-Kalantari et al. (2021). Source CSV in
+        <code>data/chexpert_sample.csv</code>.
+      </p>
+    </div>
+    <div class="card flat">
+      <h3>2. Statistical audit</h3>
+      <p>
+        ROC, calibration / Brier scores, Cohen's &kappa; for human-AI
+        agreement, and disparity metrics across patient sex and age.
+        Reproducible via <code>python src/analysis.py</code>.
+      </p>
+    </div>
+    <div class="card flat">
+      <h3>3. Anchoring simulator</h3>
+      <p>
+        A Bayesian log-odds model of the radiologist's posterior under three
+        AI presentation protocols. The interactive simulator lets you sweep
+        the anchoring weight and watch accuracy unravel when the AI is wrong.
+      </p>
+    </div>
+  </div>
+
+  <h2>Why it matters</h2>
+  <p>
+    The dominant narrative around medical AI is "human-in-the-loop" &mdash;
+    that a clinician's judgement will catch the model's mistakes. Our results,
+    consistent with the experimental literature, suggest the opposite can hold
+    true under standard deployment: when AI is shown first, clinicians
+    accept its errors at a measurable rate, and overall safety can degrade
+    even as average accuracy improves. The implication for analytics-led
+    decision-design is that <strong>workflow ordering is a behavioural
+    variable as consequential as the model itself.</strong>
+  </p>
+
+  <hr class="divider">
+
+  <h2>Project artefacts</h2>
+  <ul class="bullets">
+    <li><a href="dashboard.html">Live dashboard</a> — discrimination, calibration, agreement, demographic audit.</li>
+    <li><a href="simulator.html">Interactive anchoring simulator</a> — sweep the AI deference weight in real time.</li>
+    <li><a href="case-study.html">Case study writeup</a> — the IDx-DR / CheXpert deployment narrative in 800 words.</li>
+    <li>Source code, dataset and the 3000-word report on the
+      <a id="repo-link" href="#">accompanying GitHub repository</a>.</li>
+  </ul>
+
+  <p style="margin-top: 30px;">
+    <span class="tag">Behavioural decision research</span>
+    <span class="tag">Human–AI interaction</span>
+    <span class="tag">Healthcare AI</span>
+    <span class="tag">Algorithmic fairness</span>
+  </p>
+</main>
+
+<footer class="site-footer">
+  <div class="inner">
+    <div>&copy; 2026 &middot; MGRCM0035 Summative Assignment &middot; MSc Business Analytics, University of Bristol</div>
+    <div><a href="https://github.com" id="repo-footer">GitHub repository</a></div>
+  </div>
+</footer>
+
+<script src="assets/script.js"></script>
+</body>
+</html>

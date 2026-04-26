@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard &middot; Radiology AI Decision Making</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="nav">
+    <a href="index.html" class="brand">
+      <span class="logo"></span>
+      Radiology AI &middot; Decision Making
+    </a>
+    <ul>
+      <li><a href="index.html">Overview</a></li>
+      <li><a href="dashboard.html" class="active">Dashboard</a></li>
+      <li><a href="simulator.html">Anchoring simulator</a></li>
+      <li><a href="case-study.html">Case study</a></li>
+    </ul>
+  </div>
+</header>
+
+<main>
+  <h1>Live dashboard</h1>
+  <p>
+    Reproduced from <code>website/assets/results.json</code>, written by
+    <code>src/analysis.py</code>. All numbers shown below are computed from a
+    234-study validation sample whose AI predictions are calibrated to the
+    per-pathology AUCs of Irvin et al. (2019).
+  </p>
+
+  <div class="grid cols-4" style="margin-bottom: 32px;">
+    <div class="stat">
+      <div class="label">Sample size</div>
+      <div class="value" id="kpi-n">&hellip;</div>
+      <div class="sub">studies in validation set</div>
+    </div>
+    <div class="stat">
+      <div class="label">Mean AUC</div>
+      <div class="value" id="kpi-auc">&hellip;</div>
+      <div class="sub">across 5 pathologies</div>
+    </div>
+    <div class="stat">
+      <div class="label">Mean Brier</div>
+      <div class="value" id="kpi-brier">&hellip;</div>
+      <div class="sub">calibration loss (lower = better)</div>
+    </div>
+    <div class="stat">
+      <div class="label">Mean Cohen's &kappa;</div>
+      <div class="value" id="kpi-kappa">&hellip;</div>
+      <div class="sub">human-AI agreement</div>
+    </div>
+  </div>
+
+  <div class="grid cols-2">
+    <div class="chart"><div id="auc-chart" class="chart-tall"></div>
+      <div class="caption">Per-pathology ROC-AUC. Effusion and edema discriminate best;
+        atelectasis is the hardest call.</div>
+    </div>
+    <div class="chart"><div id="brier-chart" class="chart-tall"></div>
+      <div class="caption">Brier score per pathology. Lower is better; values above ~0.15
+        indicate substantial miscalibration.</div>
+    </div>
+  </div>
+
+  <h2>Demographic audit</h2>
+  <p>The same model underdiagnoses certain subgroups &mdash; an instance of the bias
+     mechanisms catalogued by Seyyed-Kalantari et al. (2021) on the same
+     dataset. The chart below shows true-positive rate (sensitivity) by
+     subgroup; gaps indicate where the AI fails the most vulnerable patients.</p>
+
+  <div class="grid cols-2">
+    <div class="chart"><div id="sex-chart"></div>
+      <div class="caption">True-positive and false-positive rate by patient sex.</div>
+    </div>
+    <div class="chart"><div id="age-chart"></div>
+      <div class="caption">True-positive and false-positive rate by age band.</div>
+    </div>
+  </div>
+
+  <h2>Per-pathology summary</h2>
+  <div class="card">
+    <table id="summary-table">
+      <thead>
+        <tr><th>Pathology</th><th>AUC</th><th>Brier</th><th>Cohen's &kappa;</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <p class="caption" style="color: var(--muted); font-size: 0.88rem;">
+      Cohen's &kappa; ranges 0–1; values around 0.30–0.50 indicate <em>fair</em>
+      agreement &mdash; lower than the model's standalone AUC would suggest,
+      because the AI and clinician make different kinds of errors.
+    </p>
+  </div>
+
+</main>
+
+<footer class="site-footer">
+  <div class="inner">
+    <div>&copy; 2026 &middot; MGRCM0035 Summative Assignment</div>
+    <div><a href="case-study.html">Read the case study →</a></div>
+  </div>
+</footer>
+
+<script src="assets/script.js"></script>
+<script src="assets/dashboard.js"></script>
+</body>
+</html>

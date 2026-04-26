@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Case study &middot; Radiology AI Decision Making</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="nav">
+    <a href="index.html" class="brand">
+      <span class="logo"></span>
+      Radiology AI &middot; Decision Making
+    </a>
+    <ul>
+      <li><a href="index.html">Overview</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="simulator.html">Anchoring simulator</a></li>
+      <li><a href="case-study.html" class="active">Case study</a></li>
+    </ul>
+  </div>
+</header>
+
+<main>
+  <h1>Case study: chest X-ray AI as a decision partner</h1>
+  <p style="font-size: 1.08rem; color: var(--ink-soft);">
+    A condensed narrative of the regulatory, technical and behavioural arc
+    of diagnostic AI in radiology — from IDx-DR's 2018 FDA milestone to the
+    bias audits that reshaped how the field thinks about deployment.
+  </p>
+
+  <h2>The regulatory milestone: IDx-DR (2018)</h2>
+  <p>
+    On 11 April 2018 the U.S. Food and Drug Administration granted
+    De&nbsp;Novo authorisation to <strong>IDx-DR</strong>, the first
+    medical device permitted to make an autonomous diagnosis without
+    physician interpretation
+    (<a href="https://www.fda.gov/news-events/press-announcements/fda-permits-marketing-artificial-intelligence-based-device-detect-certain-diabetes-related-eye"
+        target="_blank" rel="noopener">FDA, 2018</a>). The device screens
+    fundus photographs for diabetic retinopathy and returns one of two
+    binary recommendations: refer to an ophthalmologist, or rescreen in
+    twelve months. The pivotal trial reported sensitivity of 87.4% and
+    specificity of 89.5% across 900 patients in 10 primary care sites
+    (<em>Abr&agrave;moff et al., 2018, npj Digital Medicine</em>).
+  </p>
+  <p>
+    IDx-DR is significant less for its accuracy than for its
+    decision&nbsp;<em>architecture</em>: it bypasses the human reader entirely
+    on negative cases, removing both the cost of a referral and the cognitive
+    interaction effects we study elsewhere on this site. It is the ceiling
+    of what "human-out-of-the-loop" looks like in regulated radiology. Most
+    deployed systems sit closer to the floor.
+  </p>
+
+  <h2>The everyday case: CheXpert and the chest radiograph reader</h2>
+  <p>
+    The dominant clinical AI workflow today is <em>assistive</em>: a
+    convolutional model produces a per-pathology probability and surfaces
+    flagged studies for the radiologist to confirm or override. Stanford's
+    <strong>CheXpert</strong> (Irvin et al., 2019) is the canonical academic
+    example, with a DenseNet-121 trained on 224,316 chest radiographs
+    achieving radiologist-level AUC on five conditions (atelectasis,
+    cardiomegaly, consolidation, edema, pleural effusion).
+  </p>
+  <p>
+    Commercial counterparts &mdash; Aidoc, Annalise.ai, Lunit INSIGHT CXR &mdash;
+    are now reimbursable in several jurisdictions and read tens of millions
+    of studies annually. The behavioural design choice that defines them
+    is <strong>presentation order</strong>: do you flash the AI's prediction
+    on the worklist before the radiologist opens the image, or do you reveal
+    it only after they've recorded their own read?
+  </p>
+
+  <h2>The behavioural finding: anchoring is real</h2>
+  <p>
+    Two experimental papers form the empirical backbone of our analysis.
+    <strong>Tschandl et al. (2020, Nature Medicine)</strong> showed dermatology
+    AI suggestions to 302 dermatologists and found that <em>experts</em> with
+    AI assistance gained accuracy when AI was correct (+13.0 pp) but lost
+    accuracy when AI was wrong (&minus;11.3 pp), with the loss compounding when
+    the suggestion was shown <em>before</em> the clinician's own read.
+  </p>
+  <p>
+    <strong>Gaube et al. (2021, npj Digital Medicine)</strong> replicated
+    the effect for chest X-rays: 265 clinicians evaluating eight cases each,
+    randomised to receive AI suggestions before or after their independent
+    diagnosis. Prior-suggestion clinicians were significantly more likely
+    to accept incorrect AI advice &mdash; a 4.4 pp accuracy gap purely
+    attributable to ordering, not to the AI itself. We borrow Gaube's
+    estimated deference weight (<code>w<sub>AI</sub> &asymp; 0.45</code>)
+    as the empirical anchor in our simulator.
+  </p>
+
+  <h2>The fairness wrinkle</h2>
+  <p>
+    <strong>Seyyed-Kalantari et al. (2021, Nature Medicine)</strong>
+    audited three publicly released chest X-ray classifiers (including
+    Stanford's CheXpert release) and found systematic <em>under-diagnosis</em>
+    of female, Black, Hispanic and low-socioeconomic patients &mdash; the AI
+    was more likely to label these patients as "no finding" even when a
+    pathology was present. Under-diagnosis is the failure mode that most
+    directly compounds with anchoring: an under-diagnosing AI shown first
+    nudges a clinician toward false reassurance precisely on the patients
+    who most need a careful read.
+  </p>
+
+  <h2>What our analysis adds</h2>
+  <ul class="bullets">
+    <li>
+      A reproducible 234-study CheXpert-style sample with
+      published-AUC-calibrated AI predictions and Seyyed-Kalantari-magnitude
+      subgroup gaps.
+    </li>
+    <li>
+      A Bayesian belief-update model that turns Gaube's deference weight
+      into a continuous, sweepable parameter &mdash; visible in the
+      <a href="simulator.html">interactive simulator</a>.
+    </li>
+    <li>
+      A demonstration that in this dataset, the AI-shown-first protocol
+      raises overall accuracy by 2.9 pp but <em>drops</em> accuracy on
+      AI-wrong cases by 6.1 pp &mdash; the empirical price of the anchoring
+      hand-off.
+    </li>
+  </ul>
+
+  <h2>Lessons for analytics design</h2>
+  <p>
+    The headline result is that <strong>workflow ordering is a behavioural
+    variable as consequential as the model itself</strong>. Three takeaways
+    that generalise beyond radiology:
+  </p>
+  <ol>
+    <li><strong>Default to AI-after.</strong> Surface the model's prediction
+    only once the user has committed to their independent judgement, even
+    if the average accuracy gain is smaller. Safety on the long tail of
+    AI errors matters more than mean performance.</li>
+    <li><strong>Calibrate confidence, not just discrimination.</strong>
+    Brier scores and reliability diagrams should be standard reporting.
+    Over-confident models invite over-deference.</li>
+    <li><strong>Audit subgroup performance before deployment.</strong>
+    Anchoring on a biased model is the failure mode that combines
+    automation bias with algorithmic discrimination &mdash; a compound risk
+    no single discipline owns.</li>
+  </ol>
+
+  <p style="margin-top: 30px;">
+    <span class="tag">Anchoring bias</span>
+    <span class="tag">Automation bias</span>
+    <span class="tag">Algorithmic fairness</span>
+    <span class="tag">Decision architecture</span>
+  </p>
+
+  <hr class="divider">
+
+  <h2>Selected references</h2>
+  <ul style="font-size: 0.94rem;">
+    <li>Abr&agrave;moff, M.D., Lavin, P.T., Birch, M., Shah, N. and Folk, J.C., 2018. Pivotal trial of an autonomous AI-based diagnostic system for detection of diabetic retinopathy in primary care offices. <em>npj Digital Medicine</em>, 1(1), 39.</li>
+    <li>Gaube, S., Suresh, H., Raue, M. <em>et al.</em>, 2021. Do as AI say: susceptibility in deployment of clinical decision-aids. <em>npj Digital Medicine</em>, 4, 31.</li>
+    <li>Irvin, J. <em>et al.</em>, 2019. CheXpert: a large chest radiograph dataset with uncertainty labels and expert comparison. <em>AAAI Conference on Artificial Intelligence</em>.</li>
+    <li>Logg, J.M., Minson, J.A. and Moore, D.A., 2019. Algorithm appreciation: people prefer algorithmic to human judgment. <em>Organizational Behavior and Human Decision Processes</em>, 151, pp.90&ndash;103.</li>
+    <li>Seyyed-Kalantari, L., Zhang, H., McDermott, M.B.A., Chen, I.Y. and Ghassemi, M., 2021. Underdiagnosis bias of artificial intelligence algorithms applied to chest radiographs in under-served patient populations. <em>Nature Medicine</em>, 27, pp.2176&ndash;2182.</li>
+    <li>Tschandl, P. <em>et al.</em>, 2020. Human&ndash;computer collaboration for skin cancer recognition. <em>Nature Medicine</em>, 26, pp.1229&ndash;1234.</li>
+  </ul>
+
+</main>
+
+<footer class="site-footer">
+  <div class="inner">
+    <div>&copy; 2026 &middot; MGRCM0035 Summative Assignment</div>
+    <div><a href="index.html">← Back to overview</a></div>
+  </div>
+</footer>
+
+<script src="assets/script.js"></script>
+</body>
+</html>

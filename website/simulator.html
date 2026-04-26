@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Anchoring simulator &middot; Radiology AI Decision Making</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="nav">
+    <a href="index.html" class="brand">
+      <span class="logo"></span>
+      Radiology AI &middot; Decision Making
+    </a>
+    <ul>
+      <li><a href="index.html">Overview</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="simulator.html" class="active">Anchoring simulator</a></li>
+      <li><a href="case-study.html">Case study</a></li>
+    </ul>
+  </div>
+</header>
+
+<main>
+  <h1>Interactive anchoring simulator</h1>
+  <p>
+    A radiologist's diagnostic accuracy depends not only on their own skill
+    and the AI's accuracy, but on <em>how much weight they place on the AI's
+    suggestion</em>. Drag the slider to change the anchoring weight
+    (<code>w<sub>AI</sub></code>) and watch the simulated cohort accuracy update in
+    real time.
+  </p>
+
+  <div class="simulator">
+    <h2>Adjust the AI deference weight</h2>
+    <p>
+      <code>w<sub>AI</sub> = 0</code> &mdash; clinician ignores the AI entirely.
+      <code>w<sub>AI</sub> = 1</code> &mdash; clinician fully defers to the AI.
+      Empirical estimates from Gaube et al. (2021) suggest deployed clinicians
+      sit around <code>w<sub>AI</sub> &asymp; 0.45</code>.
+    </p>
+
+    <div class="slider-row">
+      <label for="w-slider">Anchoring weight (w<sub>AI</sub>)</label>
+      <input type="range" id="w-slider" min="0" max="1" step="0.05" value="0.45">
+      <div class="value-readout" id="w-readout">0.45</div>
+    </div>
+
+    <div class="outcome-row">
+      <div class="outcome">
+        <div class="label">Overall clinician accuracy</div>
+        <div class="value" id="out-overall">&hellip;</div>
+      </div>
+      <div class="outcome">
+        <div class="label">When AI is correct</div>
+        <div class="value" id="out-airight">&hellip;</div>
+      </div>
+      <div class="outcome">
+        <div class="label">When AI is wrong</div>
+        <div class="value" id="out-aiwrong">&hellip;</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart">
+    <div id="sensitivity-chart" class="chart-tall"></div>
+    <div class="caption">
+      Each line shows clinician accuracy as a function of how much weight is
+      placed on the AI's signal. The vertical marker tracks your slider position.
+      The yellow line (AI correct) rewards heavier deference; the red line
+      (AI wrong) collapses as deference grows. The blue line (overall accuracy)
+      is the population-weighted average and peaks around <code>w<sub>AI</sub> &asymp; 0.6</code>
+      &mdash; but at the cost of safety on the ~13&percnt; of cases where the AI errs.
+    </div>
+  </div>
+
+  <h2>What the simulator is doing</h2>
+  <p>
+    For each of the 234 simulated studies in the validation set, the clinician
+    has an internal probability estimate for the positive class
+    (<code>p<sub>clin</sub></code>) calibrated to a baseline accuracy of
+    <code>0.86</code>. The AI produces its own probability (<code>p<sub>AI</sub></code>),
+    sampled to match the per-pathology AUCs of Irvin et al. (2019). Following
+    Gaube et al. (2021) we model the posterior as a log-odds blend:
+  </p>
+
+  <p style="text-align: center; font-family: 'JetBrains Mono', monospace;
+            background: #f1f3f6; padding: 16px; border-radius: 8px;">
+    logit(p<sub>post</sub>) = (1 − w<sub>AI</sub>) · logit(p<sub>clin</sub>)
+                            + w<sub>AI</sub> · logit(p<sub>AI</sub>)
+  </p>
+
+  <p>
+    The clinician's final decision is <code>1[p<sub>post</sub> ≥ 0.5]</code>.
+    Sweeping <code>w<sub>AI</sub></code> from 0 to 1 produces the curves above
+    &mdash; a behavioural decomposition of the human-AI hand-off.
+  </p>
+
+  <h2>Three-protocol comparison</h2>
+  <p>The three protocols mapped to specific anchoring weights from the literature:</p>
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Protocol</th><th>w<sub>clin</sub></th><th>w<sub>AI</sub></th>
+          <th>Overall acc.</th><th>When AI is wrong</th>
+        </tr>
+      </thead>
+      <tbody id="protocol-table"></tbody>
+    </table>
+    <div class="caption" style="font-size: 0.88rem; color: var(--muted);">
+      "AI shown after" preserves clinician autonomy at the cost of forgoing
+      AI-correct cases the clinician would have missed alone. "AI shown first"
+      maximises overall accuracy but sees a measurable drop on the ~13&percnt; of
+      cases where the AI is wrong &mdash; the empirical signature of automation
+      bias.
+    </div>
+  </div>
+
+</main>
+
+<footer class="site-footer">
+  <div class="inner">
+    <div>&copy; 2026 &middot; MGRCM0035 Summative Assignment</div>
+    <div><a href="case-study.html">Read the case study →</a></div>
+  </div>
+</footer>
+
+<script src="assets/script.js"></script>
+<script src="assets/simulator.js"></script>
+</body>
+</html>
